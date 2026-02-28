@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - RentRide</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+      padding: var(--spacing-md);
+    }
+
+    .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Desk Lamp Styles */
+    .lamp-container {
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      user-select: none;
+    }
+
+    .lamp-container:hover {
+      transform: scale(1.05);
+    }
+
+    .lamp-base {
+      width: 120px;
+      height: 15px;
+      background: linear-gradient(to bottom, #2d2d2d, #1a1a1a);
+      border-radius: 8px;
+      position: relative;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .lamp-arm {
+      width: 8px;
+      height: 80px;
+      background: linear-gradient(to right, #3a3a3a, #2a2a2a);
+      position: absolute;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 4px;
+    }
+
+    .lamp-head {
+      width: 100px;
+      height: 80px;
+      background: linear-gradient(to bottom, #4a4a4a, #2a2a2a);
+      border-radius: 50% 50% 45% 45%;
+      position: absolute;
+      bottom: 95px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      transition: all 0.5s ease;
+    }
+
+    .lamp-glow {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      height: 60%;
+      background: radial-gradient(ellipse at center, 
+        rgba(255, 255, 100, 0) 0%,
+        rgba(255, 255, 100, 0) 100%);
+      border-radius: 50%;
+      opacity: 0;
+      transition: all 0.5s ease;
+    }
+
+    .lamp-on .lamp-glow {
+      opacity: 1;
+      background: radial-gradient(ellipse at center, 
+        rgba(255, 255, 100, 0.8) 0%,
+        rgba(144, 238, 144, 0.4) 40%,
+        rgba(144, 238, 144, 0) 70%);
+      filter: blur(3px);
+    }
+
+    .light-beam {
+      position: absolute;
+      bottom: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 150px solid transparent;
+      border-right: 150px solid transparent;
+      border-top: 200px solid rgba(255, 255, 100, 0);
+      opacity: 0;
+      transition: all 0.6s ease;
+      filter: blur(20px);
+    }
+
+    .lamp-on .light-beam {
+      opacity: 0.4;
+      border-top-color: rgba(255, 255, 100, 0.3);
+    }
+
+    .lamp-face {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 70px;
+      height: 50px;
+    }
+
+    .eye {
+      position: absolute;
+      width: 12px;
+      height: 3px;
+      background: #1a1a1a;
+      border-radius: 50%;
+      top: 15px;
+      transition: all 0.5s ease;
+    }
+
+    .eye.left {
+      left: 15px;
+    }
+
+    .eye.right {
+      right: 15px;
+    }
+
+    .lamp-on .eye {
+      height: 12px;
+      background: #000;
+      border: 2px solid #39ff14;
+      box-shadow: 0 0 8px rgba(57, 255, 20, 0.8);
+    }
+
+    .mouth {
+      position: absolute;
+      width: 25px;
+      height: 12px;
+      border: 2px solid transparent;
+      border-bottom-color: transparent;
+      border-radius: 0 0 25px 25px;
+      top: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: all 0.5s ease;
+    }
+
+    .lamp-on .mouth {
+      border-color: #39ff14;
+      border-top-color: transparent;
+      width: 30px;
+      height: 15px;
+      box-shadow: 0 0 6px rgba(57, 255, 20, 0.6);
+    }
+
+    .pull-cord {
+      position: absolute;
+      width: 2px;
+      height: 40px;
+      background: linear-gradient(to bottom, #555, #333);
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .cord-handle {
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 12px;
+      height: 12px;
+      background: linear-gradient(135deg, #4a4a4a, #2a2a2a);
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+      transition: transform 0.2s ease;
+    }
+
+    .lamp-container:active .cord-handle {
+      transform: translateX(-50%) translateY(5px);
+    }
+
+    /* Login Card Styles */
+    .login-card {
+      background: rgba(20, 20, 35, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 45px 40px;
+      width: 420px;
+      max-width: 90vw;
+      border: 2px solid transparent;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+      transform: translateX(100px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      position: relative;
+    }
+
+    .login-card.active {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: all;
+      border-color: #39ff14;
+      box-shadow: 
+        0 0 30px rgba(57, 255, 20, 0.3),
+        0 0 60px rgba(57, 255, 20, 0.2),
+        0 25px 60px rgba(0, 0, 0, 0.5);
+      animation: glowPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% {
+        box-shadow: 
+          0 0 20px rgba(57, 255, 20, 0.3),
+          0 0 40px rgba(57, 255, 20, 0.2),
+          0 25px 60px rgba(0, 0, 0, 0.5);
+      }
+      50% {
+        box-shadow: 
+          0 0 40px rgba(57, 255, 20, 0.5),
+          0 0 80px rgba(57, 255, 20, 0.3),
+          0 25px 60px rgba(0, 0, 0, 0.5);
+      }
+    }
+
+    .login-brand {
+      display: block;
+      font-size: 1.75rem;
+      text-align: center;
+      margin-bottom: var(--spacing-md);
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .login-card h2 {
+      color: #fff;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .login-card .subtitle {
+      color: #a0a0a0;
+      font-size: 14px;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 22px;
+    }
+
+    .form-group label {
+      display: block;
+      color: #d0d0d0;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      letter-spacing: 0.3px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(40, 40, 60, 0.6);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: #39ff14;
+      background: rgba(40, 40, 60, 0.8);
+      box-shadow: 0 0 0 4px rgba(57, 255, 20, 0.1);
+    }
+
+    .form-group input::placeholder {
+      color: #666;
+    }
+
+    .form-error {
+      color: #ff4444;
+      font-size: 12px;
+      margin-top: 5px;
+      display: block;
+    }
+
+    .forgot-password {
+      text-align: right;
+      margin-bottom: 25px;
+    }
+
+    .forgot-password a {
+      color: #39ff14;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .forgot-password a:hover {
+      color: #2ede00;
+      text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #39ff14, #2ede00);
+      border: none;
+      border-radius: 10px;
+      color: #000;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      box-shadow: 0 8px 20px rgba(57, 255, 20, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .login-btn:hover::before {
+      width: 400px;
+      height: 400px;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(57, 255, 20, 0.5);
+    }
+
+    .login-btn:active {
+      transform: translateY(0);
+    }
+
+    .login-btn span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .auth-footer {
+      text-align: center;
+      margin-top: 25px;
+      padding-top: 25px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .auth-footer p {
+      margin: 0;
+      color: #a0a0a0;
+      font-size: 14px;
+    }
+
+    .auth-footer a {
+      color: #39ff14;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .auth-footer a:hover {
+      color: #2ede00;
+      text-shadow: 0 0 8px rgba(57, 255, 20, 0.5);
+    }
+
+    /* Background Decorations */
+    .bg-decoration {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.15;
+      pointer-events: none;
+    }
+
+    .bg-decoration.green {
+      width: 400px;
+      height: 400px;
+      background: #39ff14;
+      top: -100px;
+      right: -100px;
+      animation: float 8s ease-in-out infinite;
+    }
+
+    .bg-decoration.purple {
+      width: 350px;
+      height: 350px;
+      background: #8b5cf6;
+      bottom: -100px;
+      left: -100px;
+      animation: float 10s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translate(0, 0);
+      }
+      50% {
+        transform: translate(30px, -30px);
+      }
+    }
+
+    /* Responsive Design */
+   
+    /* Tablet and Small Laptops */
+    @media (max-width: 1024px) {
+      .container {
+        gap: 60px;
+      }
+      
+      .login-card {
+        width: 400px;
+        padding: 40px 35px;
+      }
+      
+      .lamp-container {
+        transform: scale(0.9);
+      }
+      
+      .bg-decoration.green,
+      .bg-decoration.purple {
+        opacity: 0.1;
+      }
+    }
+    
+    /* Mobile Landscape and Tablet Portrait */
+    @media (max-width: 968px) {
+      body {
+        padding: var(--spacing-sm);
+      }
+      
+      .container {
+        flex-direction: column;
+        gap: 40px;
+        padding: var(--spacing-md) 0;
+      }
+
+      .lamp-container {
+        transform: scale(0.75);
+        margin-top: 20px;
+      }
+
+      .login-card {
+        width: 90%;
+        max-width: 420px;
+        padding: 35px 30px;
+      }
+
+      .login-card.active {
+        transform: translateY(0);
+      }
+
+      .login-card {
+        transform: translateY(50px);
+      }
+      
+      .login-brand {
+        font-size: 1.5rem;
+      }
+      
+      .login-card h2 {
+        font-size: 24px;
+      }
+      
+      .login-card .subtitle {
+        font-size: 13px;
+      }
+      
+      .bg-decoration.green,
+      .bg-decoration.purple {
+        opacity: 0.08;
+        filter: blur(60px);
+      }
+    }
+    
+    /* Mobile Portrait */
+    @media (max-width: 480px) {
+      body {
+        padding: 0.5rem;
+      }
+      
+      .container {
+        gap: 30px;
+        padding: 1rem 0;
+      }
+      
+      .lamp-container {
+        transform: scale(0.6);
+        margin-top: 0;
+      }
+      
+      .lamp-container:hover {
+        transform: scale(0.63);
+      }
+      
+      .login-card {
+        width: 100%;
+        max-width: 100%;
+        padding: 28px 24px;
+        border-radius: 20px;
+      }
+      
+      .login-brand {
+        font-size: 1.35rem;
+        margin-bottom: 1rem;
+      }
+      
+      .login-card h2 {
+        font-size: 22px;
+        margin-bottom: 6px;
+      }
+      
+      .login-card .subtitle {
+        font-size: 12px;
+        margin-bottom: 24px;
+      }
+      
+      .form-group {
+        margin-bottom: 18px;
+      }
+      
+      .form-group label {
+        font-size: 12px;
+        margin-bottom: 6px;
+      }
+      
+      .form-group input {
+        padding: 12px 14px;
+        font-size: 14px;
+        border-radius: 8px;
+      }
+      
+      .forgot-password {
+        margin-bottom: 20px;
+      }
+      
+      .forgot-password a {
+        font-size: 12px;
+      }
+      
+      .login-btn {
+        padding: 12px;
+        font-size: 14px;
+        border-radius: 8px;
+        letter-spacing: 0.6px;
+      }
+      
+      .auth-footer {
+        margin-top: 20px;
+        padding-top: 20px;
+      }
+      
+      .auth-footer p {
+        font-size: 13px;
+      }
+      
+      .bg-decoration.green {
+        width: 250px;
+        height: 250px;
+        top: -50px;
+        right: -50px;
+      }
+      
+      .bg-decoration.purple {
+        width: 200px;
+        height: 200px;
+        bottom: -50px;
+        left: -50px;
+      }
+    }
+    
+    /* Small Mobile Phones */
+    @media (max-width: 375px) {
+      .container {
+        gap: 20px;
+      }
+      
+      .lamp-container {
+        transform: scale(0.5);
+      }
+      
+      .lamp-container:hover {
+        transform: scale(0.52);
+      }
+      
+      .login-card {
+        padding: 24px 20px;
+        border-radius: 16px;
+      }
+      
+      .login-brand {
+        font-size: 1.2rem;
+      }
+      
+      .login-card h2 {
+        font-size: 20px;
+      }
+      
+      .login-card .subtitle {
+        font-size: 11px;
+      }
+      
+      .form-group {
+        margin-bottom: 16px;
+      }
+      
+      .form-group input {
+        padding: 11px 12px;
+        font-size: 13px;
+      }
+      
+      .login-btn {
+        padding: 11px;
+        font-size: 13px;
+      }
+      
+      .bg-decoration {
+        display: none;
+      }
+    }
+    
+    /* Landscape orientation on small devices */
+    @media (max-height: 600px) and (orientation: landscape) {
+      .container {
+        flex-direction: row;
+        gap: 30px;
+        padding: 1rem;
+      }
+      
+      .lamp-container {
+        transform: scale(0.5);
+      }
+      
+      .login-card {
+        max-width: 350px;
+        padding: 20px;
+      }
+      
+      .login-card h2 {
+        font-size: 20px;
+      }
+      
+      .form-group {
+        margin-bottom: 12px;
+      }
+      
+      .form-group input {
+        padding: 10px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Decorations -->
+  <div class="bg-decoration green"></div>
+  <div class="bg-decoration purple"></div>
+
+  <div class="container">
+    <!-- Desk Lamp -->
+    <div class="lamp-container" id="lamp" tabindex="0" role="button" aria-label="Toggle lamp and login form">
+      <div class="light-beam"></div>
+      <div class="lamp-head">
+        <div class="lamp-glow"></div>
+        <div class="lamp-face">
+          <div class="eye left"></div>
+          <div class="eye right"></div>
+          <div class="mouth"></div>
+        </div>
+      </div>
+      <div class="lamp-arm">
+        <div class="pull-cord">
+          <div class="cord-handle"></div>
+        </div>
+      </div>
+      <div class="lamp-base"></div>
+    </div>
+
+    <!-- Login Card -->
+    <div class="login-card" id="loginCard">
+      <a href="index.html" class="login-brand">🚗 RentRide</a>
+      <h2>Welcome Back</h2>
+      <p class="subtitle">Login to access your account and bookings</p>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input 
+            type="email" 
+            id="email" 
+            placeholder="your.email@example.com"
+            required
+          >
+          <span class="form-error" id="emailError"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            placeholder="Enter your password"
+            required
+          >
+          <span class="form-error" id="passwordError"></span>
+        </div>
+
+        <div class="forgot-password">
+          <a href="#" onclick="event.preventDefault(); alert('Password recovery feature coming soon!')">
+            Forgot Password?
+          </a>
+        </div>
+
+        <button type="submit" class="login-btn">
+          <span>Login</span>
+        </button>
+
+        <div class="auth-footer">
+          <p>Don't have an account? <a href="register.html">Sign up</a></p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    // Check if already logged in
+    if (getToken()) {
+      window.location.href = 'dashboard.html';
+    }
+
+    const lamp = document.getElementById('lamp');
+    const loginCard = document.getElementById('loginCard');
+    const loginForm = document.getElementById('loginForm');
+    let isOn = false;
+
+    // Toggle lamp and login card
+    function toggleLamp() {
+      isOn = !isOn;
+      
+      if (isOn) {
+        lamp.classList.add('lamp-on');
+        loginCard.classList.add('active');
+      } else {
+        lamp.classList.remove('lamp-on');
+        loginCard.classList.remove('active');
+      }
+    }
+
+    lamp.addEventListener('click', toggleLamp);
+
+    // Keyboard accessibility
+    lamp.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleLamp();
+      }
+    });
+
+    // Handle login form submission
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Clear previous errors
+      document.getElementById('emailError').textContent = '';
+      document.getElementById('passwordError').textContent = '';
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      // Validation
+      let hasError = false;
+
+      if (!validateEmail(email)) {
+        document.getElementById('emailError').textContent = 'Please enter a valid email address';
+        hasError = true;
+      }
+
+      if (!password) {
+        document.getElementById('passwordError').textContent = 'Password is required';
+        hasError = true;
+      }
+
+      if (hasError) return;
+
+      // Submit login
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      setLoading(submitBtn, true);
+
+      try {
+        const data = await API.login({ email, password });
+
+        // Store token and user data
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        showToast('Login successful! Redirecting...', 'success');
+
+        // Redirect to dashboard
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1000);
+
+      } catch (error) {
+        showToast(error.message || 'Login failed. Please check your credentials.', 'error');
+        setLoading(submitBtn, false);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - RentRide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">🚗 RentRide</a>
+      <ul class="navbar-menu">
+        <li><a href="index.html" class="navbar-link">Home</a></li>
+        <li><a href="vehicles.html" class="navbar-link">Browse Vehicles</a></li>
+        <li><a href="dashboard.html" class="navbar-link active">Dashboard</a></li>
+        <li><button onclick="logout()" class="btn btn-ghost btn-sm">Logout</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div style="padding: 100px 0 40px;">
+    <div class="container">
+      <h1 class="mb-4">My Dashboard</h1>
+      
+      <div class="dashboard-layout">
+        <aside class="dashboard-sidebar card">
+          <div class="user-profile">
+            <div class="user-avatar">👤</div>
+            <h3 id="userName">Loading...</h3>
+            <p id="userEmail" style="color: var(--text-muted); font-size: 0.875rem;"></p>
+          </div>
+          
+          <nav class="dashboard-nav">
+            <button class="dashboard-nav-item active" data-tab="bookings">My Bookings</button>
+            <button class="dashboard-nav-item" data-tab="profile">Profile</button>
+          </nav>
+        </aside>
+
+        <main class="dashboard-content">
+          <!-- Bookings Tab -->
+          <div id="bookings-tab" class="dashboard-tab active">
+            <h2>My Bookings</h2>
+            <div id="bookingsList" class="mt-3">
+              <div class="loading-container" style="min-height: 300px;">
+                <div class="loading-spinner"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Tab -->
+          <div id="profile-tab" class="dashboard-tab hidden">
+            <h2>Profile Settings</h2>
+            <form id="profileForm" class="mt-3 card" style="max-width: 600px;">
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" id="profileName" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" id="profilePhone" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email (Read Only)</label>
+                <input type="email" id="profileEmail" class="form-input" disabled>
+              </div>
+              <button type="submit" class="btn btn-primary">Update Profile</button>
+            </form>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    if (!requireAuth()) {
+      // requireAuth will redirect if not authenticated
+    }
+
+    let currentUser = null;
+
+    async function loadUserProfile() {
+      try {
+        const data = await API.getProfile();
+        if (data.success) {
+          currentUser = data.user;
+          document.getElementById('userName').textContent = data.user.name;
+          document.getElementById('userEmail').textContent = data.user.email;
+          document.getElementById('profileName').value = data.user.name;
+          document.getElementById('profilePhone').value = data.user.phone;
+          document.getElementById('profileEmail').value = data.user.email;
+        }
+      } catch (error) {
+        showToast('Failed to load profile', 'error');
+      }
+    }
+
+    async function loadBookings() {
+      try {
+        const data = await API.getUserBookings();
+        const container = document.getElementById('bookingsList');
+
+        if (data.success && data.bookings.length > 0) {
+          container.innerHTML = data.bookings.map(booking => `
+            <div class="booking-card card">
+              <div class="booking-header">
+                <div>
+                  <h3>${booking.vehicle.name}</h3>
+                  <p style="color: var(--text-muted); margin: 5px 0;">${formatDate(booking.startDate)} - ${formatDate(booking.endDate)}</p>
+                </div>
+                <div>
+                  <span class="badge badge-${getStatusColor(booking.status)}">${booking.status}</span>
+                  <span class="badge badge-${getPaymentColor(booking.paymentStatus)}">${booking.paymentStatus}</span>
+                </div>
+              </div>
+              
+              <div class="booking-details">
+                <div class="booking-detail-item">
+                  <span>Total Days:</span>
+                  <strong>${booking.totalDays}</strong>
+                </div>
+                <div class="booking-detail-item">
+                  <span>Total Price:</span>
+                  <strong>$${booking.totalPrice}</strong>
+                </div>
+                <div class="booking-detail-item">
+                  <span>Pickup:</span>
+                  <strong>${booking.pickupLocation || 'N/A'}</strong>
+                </div>
+              </div>
+
+              ${booking.status === 'confirmed' || booking.status === 'pending' ? `
+                <button class="btn btn-danger btn-sm mt-3" onclick="cancelBooking('${booking._id}')">Cancel Booking</button>
+              ` : ''}
+            </div>
+          `).join('');
+        } else {
+          container.innerHTML = '<div class="card text-center"><p>You have no bookings yet.</p><a href="vehicles.html" class="btn btn-primary mt-3">Browse Vehicles</a></div>';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showToast('Failed to load bookings', 'error');
+      }
+    }
+
+    function getStatusColor(status) {
+      const colors = {
+        pending: 'warning',
+        confirmed: 'success',
+        cancelled: 'danger',
+        completed: 'primary'
+      };
+      return colors[status] || 'primary';
+    }
+
+    function getPaymentColor(status) {
+      const colors = {
+        pending: 'warning',
+        paid: 'success',
+        failed: 'danger',
+        refunded: 'primary'
+      };
+      return colors[status] || 'primary';
+    }
+
+    async function cancelBooking(bookingId) {
+      if (!confirm('Are you sure you want to cancel this booking?')) return;
+
+      try {
+        const data = await API.cancelBooking(bookingId);
+        if (data.success) {
+          showToast('Booking cancelled successfully', 'success');
+          loadBookings();
+        }
+      } catch (error) {
+        showToast(error.message || 'Failed to cancel booking', 'error');
+      }
+    }
+
+    // Tab switching
+    document.querySelectorAll('.dashboard-nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const tab = item.dataset.tab;
+        
+        // Update nav
+        document.querySelectorAll('.dashboard-nav-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        
+        // Update content
+        document.querySelectorAll('.dashboard-tab').forEach(t => t.classList.add('hidden'));
+        document.getElementById(`${tab}-tab`).classList.remove('hidden');
+      });
+    });
+
+    // Profile form submission
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('profileName').value;
+      const phone = document.getElementById('profilePhone').value;
+
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      setLoading(submitBtn, true);
+
+      try {
+        const data = await API.updateProfile({ name, phone });
+        if (data.success) {
+          showToast('Profile updated successfully', 'success');
+          loadUserProfile();
+        }
+      } catch (error) {
+        showToast(error.message || 'Failed to update profile', 'error');
+      } finally {
+        setLoading(submitBtn, false);
+      }
+    });
+
+    // Load data
+    loadUserProfile();
+    loadBookings();
+  </script>
+
+  <style>
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: var(--spacing-xl);
+      margin-top: var(--spacing-lg);
+    }
+
+    .dashboard-sidebar {
+      height: fit-content;
+      position: sticky;
+      top: 100px;
+    }
+
+    .user-profile {
+      text-align: center;
+      padding-bottom: var(--spacing-lg);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .user-avatar {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto var(--spacing-md);
+      background: var(--gradient-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+    }
+
+    .user-profile h3 {
+      margin-bottom: 0.25rem;
+    }
+
+    .dashboard-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .dashboard-nav-item {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      text-align: left;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-base);
+      font-family: var(--font-sans);
+      font-size: 1rem;
+    }
+
+    .dashboard-nav-item:hover {
+      background: var(--bg-glass);
+      color: var(--text-primary);
+    }
+
+    .dashboard-nav-item.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .booking-card {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .booking-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: var(--spacing-md);
+      gap: var(--spacing-md);
+    }
+
+    .booking-header h3 {
+      margin-bottom: 0;
+    }
+
+    .booking-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-md);
+      padding: var(--spacing-md);
+      background: var(--bg-glass);
+      border-radius: var(--radius-md);
+    }
+
+    .booking-detail-item {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .booking-detail-item span {
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 968px) {
+      .dashboard-layout {
+        grid-template-columns: 1fr;
+      }
+      .dashboard-sidebar {
+        position: static;
+      }
+    }
+  </style>
+</body>
+</html>

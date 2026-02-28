@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Premium vehicle rental service - Find and rent the perfect vehicle for your journey">
+  <title>RentRide - Premium Vehicle Rentals</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">🚗 RentRide</a>
+      
+      <button class="navbar-toggle" id="navbarToggle" aria-label="Toggle navigation">
+        ☰
+      </button>
+      
+      <ul class="navbar-menu" id="navbarMenu">
+        <li><a href="index.html" class="navbar-link active">Home</a></li>
+        <li><a href="vehicles.html" class="navbar-link">Browse Vehicles</a></li>
+        <li><a href="#how-it-works" class="navbar-link">How It Works</a></li>
+        <li id="authLink">
+          <a href="login.html" class="btn btn-primary btn-sm">Login</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content animate-fadeIn">
+        <h1 class="hero-title">Find Your Perfect Ride</h1>
+        <p class="hero-subtitle">
+          Discover premium vehicles at unbeatable prices. From luxury cars to everyday rides, we've got you covered.
+        </p>
+        
+        <!-- Search Bar -->
+        <div class="hero-search card-glass">
+          <div class="search-grid">
+            <div class="search-field">
+              <label>Location</label>
+              <input type="text" id="searchLocation" placeholder="Enter city">
+            </div>
+            <div class="search-field">
+              <label>Pick-up Date</label>
+              <input type="date" id="searchStartDate">
+            </div>
+            <div class="search-field">
+              <label>Return Date</label>
+              <input type="date" id="searchEndDate">
+            </div>
+            <button class="btn btn-primary" onclick="searchVehicles()">
+              Search Vehicles
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="hero-stats">
+          <div class="stat-item animate-float">
+            <div class="stat-number text-gradient">500+</div>
+            <div class="stat-text">Vehicles</div>
+          </div>
+          <div class="stat-item animate-float" style="animation-delay: 0.2s">
+            <div class="stat-number text-gradient">10K+</div>
+            <div class="stat-text">Happy Customers</div>
+          </div>
+          <div class="stat-item animate-float" style="animation-delay: 0.4s">
+            <div class="stat-number text-gradient">50+</div>
+            <div class="stat-text">Cities</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Vehicles -->
+  <section class="section" id="featured">
+    <div class="container">
+      <div class="section-header text-center">
+        <h2>Featured Vehicles</h2>
+        <p>Explore our most popular and recently added vehicles</p>
+      </div>
+      
+      <div class="grid grid-3" id="featuredVehicles">
+        <!-- Vehicles will be rendered here -->
+        <div class="loading-container">
+          <div class="loading-spinner"></div>
+        </div>
+      </div>
+
+      <div class="text-center mt-4">
+        <a href="vehicles.html" class="btn btn-outline btn-lg">View All Vehicles</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="section" id="how-it-works" style="background: var(--bg-secondary);">
+    <div class="container">
+      <div class="section-header text-center">
+        <h2>How It Works</h2>
+        <p>Rent a vehicle in three simple steps</p>
+      </div>
+
+      <div class="grid grid-3">
+        <div class="card card-glass text-center animate-slideInLeft">
+          <div class="step-icon">1</div>
+          <h3>Choose Vehicle</h3>
+          <p>Browse our wide selection and pick the perfect vehicle for your needs</p>
+        </div>
+
+        <div class="card card-glass text-center animate-fadeIn">
+          <div class="step-icon">2</div>
+          <h3>Book & Pay</h3>
+          <p>Select your dates, complete the secure payment, and confirm your booking</p>
+        </div>
+
+        <div class="card card-glass text-center animate-slideInRight">
+          <div class="step-icon">3</div>
+          <h3>Hit the Road</h3>
+          <p>Pick up your vehicle and enjoy your journey with complete peace of mind</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vehicle Types -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header text-center">
+        <h2>Browse by Category</h2>
+        <p>Find the perfect vehicle type for your journey</p>
+      </div>
+
+      <div class="grid grid-5">
+        <a href="vehicles.html?type=car" class="category-card">
+          <div class="category-icon">🚗</div>
+          <h4>Cars</h4>
+          <p>Sedans & Hatchbacks</p>
+        </a>
+
+        <a href="vehicles.html?type=suv" class="category-card">
+          <div class="category-icon">🚙</div>
+          <h4>SUVs</h4>
+          <p>Spacious & Powerful</p>
+        </a>
+
+        <a href="vehicles.html?type=luxury" class="category-card">
+          <div class="category-icon">✨</div>
+          <h4>Luxury</h4>
+          <p>Premium Experience</p>
+        </a>
+
+        <a href="vehicles.html?type=bike" class="category-card">
+          <div class="category-icon">🏍️</div>
+          <h4>Bikes</h4>
+          <p>Two-Wheelers</p>
+        </a>
+
+        <a href="vehicles.html?type=van" class="category-card">
+          <div class="category-icon">🚐</div>
+          <h4>Vans</h4>
+          <p>Group & Cargo</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="section" style="background: var(--bg-secondary);">
+    <div class="container">
+      <div class="section-header text-center">
+        <h2>What Our Customers Say</h2>
+        <p>Trusted by thousands of satisfied customers</p>
+      </div>
+
+      <div class="grid grid-3">
+        <div class="card card-glass">
+          <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
+          <p class="testimonial-text">
+            "Amazing service! The booking process was smooth and the vehicle was in perfect condition. Highly recommended!"
+          </p>
+          <div class="testimonial-author">
+            <strong>Sarah Johnson</strong>
+            <span>Verified Customer</span>
+          </div>
+        </div>
+
+        <div class="card card-glass">
+          <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
+          <p class="testimonial-text">
+            "Best rental experience I've had. Great prices, excellent customer support, and a wide variety of vehicles."
+          </p>
+          <div class="testimonial-author">
+            <strong>Michael Chen</strong>
+            <span>Verified Customer</span>
+          </div>
+        </div>
+
+        <div class="card card-glass">
+          <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
+          <p class="testimonial-text">
+            "Professional and reliable. I rent from RentRide for all my business trips. Never disappointed!"
+          </p>
+          <div class="testimonial-author">
+            <strong>Emily Rodriguez</strong>
+            <span>Verified Customer</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container text-center">
+      <h2>Ready to Start Your Journey?</h2>
+      <p>Join thousands of satisfied customers and find your perfect vehicle today</p>
+      <div class="cta-buttons">
+        <a href="vehicles.html" class="btn btn-primary btn-lg">Browse Vehicles</a>
+        <a href="register.html" class="btn btn-outline btn-lg">Create Account</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>RentRide</h4>
+          <p>Your trusted partner for premium vehicle rentals. Quality vehicles, affordable prices, exceptional service.</p>
+        </div>
+
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="vehicles.html" class="footer-link">Browse Vehicles</a></li>
+            <li><a href="#how-it-works" class="footer-link">How It Works</a></li>
+            <li><a href="dashboard.html" class="footer-link">My Bookings</a></li>
+            <li><a href="login.html" class="footer-link">Login</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Support</h4>
+          <ul class="footer-links">
+            <li><a href="#" class="footer-link">Help Center</a></li>
+            <li><a href="#" class="footer-link">Contact Us</a></li>
+            <li><a href="#" class="footer-link">Terms of Service</a></li>
+            <li><a href="#" class="footer-link">Privacy Policy</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Contact</h4>
+          <p>Email: support@rentride.com</p>
+          <p>Phone: +1 (555) 123-4567</p>
+          <p>Available 24/7</p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 RentRide. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Page-specific styles -->
+  <style>
+    /* Hero Section */
+    .hero {
+      padding: 140px 0 80px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.1), transparent 50%),
+                  radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.1), transparent 50%);
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto var(--spacing-xl);
+    }
+
+    .hero-search {
+      max-width: 900px;
+      margin: 0 auto var(--spacing-2xl);
+      padding: var(--spacing-lg);
+    }
+
+    .search-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-md);
+      align-items: end;
+    }
+
+    .search-field label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: var(--spacing-xs);
+      color: var(--text-primary);
+    }
+
+    .search-field input {
+      width: 100%;
+      padding: 0.875rem;
+      background: var(--bg-tertiary);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 1rem;
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: var(--spacing-2xl);
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-text {
+      font-size: 1rem;
+      color: var(--text-secondary);
+    }
+
+    /* Section Header */
+    .section-header {
+      margin-bottom: var(--spacing-2xl);
+    }
+
+    .section-header h2 {
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .section-header p {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+    }
+
+    /* Step Icons */
+    .step-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto var(--spacing-md);
+      background: var(--gradient-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 800;
+      color: white;
+    }
+
+    /* Category Cards */
+    .category-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius-xl);
+      padding: var(--spacing-xl);
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all var(--transition-base);
+      cursor: pointer;
+    }
+
+    .category-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .category-icon {
+      font-size: 4rem;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .category-card h4 {
+      margin-bottom: var(--spacing-xs);
+      color: var(--text-primary);
+    }
+
+    .category-card p {
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* Testimonials */
+    .testimonial-rating {
+      font-size: 1.25rem;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .testimonial-text {
+      font-style: italic;
+      margin-bottom: var(--spacing-md);
+      font-size: 1rem;
+    }
+
+    .testimonial-author {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .testimonial-author strong {
+      color: var(--text-primary);
+    }
+
+    .testimonial-author span {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    /* CTA Section */
+    .cta-section {
+      padding: var(--spacing-2xl) 0;
+      background: var(--gradient-primary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.05)" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+      opacity: 0.3;
+    }
+
+    .cta-section h2 {
+      color: white;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .cta-section p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.125rem;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: var(--spacing-md);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .cta-buttons .btn-outline {
+      background: white;
+      color: var(--primary);
+      border-color: white;
+    }
+
+    .cta-buttons .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    @media (max-width: 768px) {
+      .search-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-stats {
+        gap: var(--spacing-lg);
+      }
+
+      .stat-number {
+        font-size: 2rem;
+      }
+    }
+  </style>
+
+  <!-- Scripts -->
+  <script src="js/utils.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const navbar = document.getElementById('navbar');
+      if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+
+    // Mobile menu toggle
+    document.getElementById('navbarToggle')?.addEventListener('click', () => {
+      document.getElementById('navbarMenu')?.classList.toggle('active');
+    });
+
+    // Check authentication
+    const token = localStorage.getItem('token');
+    const authLink = document.getElementById('authLink');
+    
+    if (token) {
+      authLink.innerHTML = `
+        <a href="dashboard.html" class="btn btn-primary btn-sm">Dashboard</a>
+      `;
+    }
+
+    // Search vehicles
+    function searchVehicles() {
+      const location = document.getElementById('searchLocation').value;
+      const startDate = document.getElementById('searchStartDate').value;
+      const endDate = document.getElementById('searchEndDate').value;
+
+      const params = new URLSearchParams();
+      if (location) params.append('city', location);
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+
+      window.location.href = `vehicles.html?${params.toString()}`;
+    }
+
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('searchStartDate').setAttribute('min', today);
+    document.getElementById('searchEndDate').setAttribute('min', today);
+
+    // Load featured vehicles
+    async function loadFeaturedVehicles() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/vehicles?available=true`);
+        const data = await response.json();
+
+        if (data.success && data.vehicles.length > 0) {
+          const featured = data.vehicles.slice(0, 6);
+          displayVehicles(featured);
+        } else {
+          document.getElementById('featuredVehicles').innerHTML = '<p class="text-center">No vehicles available at the moment.</p>';
+        }
+      } catch (error) {
+        console.error('Error loading vehicles:', error);
+        document.getElementById('featuredVehicles').innerHTML = '<p class="text-center text-danger">Failed to load vehicles. Please try again later.</p>';
+      }
+    }
+
+    function displayVehicles(vehicles) {
+      const container = document.getElementById('featuredVehicles');
+      container.innerHTML = vehicles.map(vehicle => `
+        <div class="vehicle-card" onclick="window.location.href='vehicle-details.html?id=${vehicle._id}'">
+          <img src="${vehicle.images[0] || 'https://via.placeholder.com/400x240'}" alt="${vehicle.name}" class="vehicle-card-image">
+          <div class="vehicle-card-content">
+            <div class="vehicle-card-header">
+              <div>
+                <div class="vehicle-card-name">${vehicle.name}</div>
+                <div class="vehicle-card-type">${vehicle.type}</div>
+              </div>
+              <div class="vehicle-card-price">$${vehicle.pricePerDay}<span style="font-size: 0.875rem; font-weight: 500;">/day</span></div>
+            </div>
+            <div class="vehicle-card-info">
+              <div class="vehicle-card-spec">👥 ${vehicle.specifications.seats} Seats</div>
+              <div class="vehicle-card-spec">⚙️ ${vehicle.specifications.transmission}</div>
+              <div class="vehicle-card-spec">⛽ ${vehicle.specifications.fuelType}</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Load vehicles on page load
+    loadFeaturedVehicles();
+  </script>
+</body>
+</html>

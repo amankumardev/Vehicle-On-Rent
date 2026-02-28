@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Vehicles - RentRide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">🚗 RentRide</a>
+      <button class="navbar-toggle" id="navbarToggle">☰</button>
+      <ul class="navbar-menu" id="navbarMenu">
+        <li><a href="index.html" class="navbar-link">Home</a></li>
+        <li><a href="vehicles.html" class="navbar-link active">Browse Vehicles</a></li>
+        <li id="authLink">
+          <a href="login.html" class="btn btn-primary btn-sm">Login</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div style="padding: 100px 0 40px;">
+    <div class="container">
+      <h1 class="text-center mb-4">Find Your Perfect Vehicle</h1>
+      
+      <div class="vehicles-layout">
+        <!-- Filters -->
+        <aside class="filters-sidebar card">
+          <h3>Filters</h3>
+          
+          <div class="filter-group">
+            <label class="form-label">Vehicle Type</label>
+            <select id="filterType" class="form-select">
+              <option value="">All Types</option>
+              <option value="car">Car</option>
+              <option value="suv">SUV</option>
+              <option value="luxury">Luxury</option>
+              <option value="bike">Bike</option>
+              <option value="van">Van</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="form-label">Transmission</label>
+            <select id="filterTransmission" class="form-select">
+              <option value="">All</option>
+              <option value="automatic">Automatic</option>
+              <option value="manual">Manual</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="form-label">Fuel Type</label>
+            <select id="filterFuel" class="form-select">
+              <option value="">All</option>
+              <option value="petrol">Petrol</option>
+              <option value="diesel">Diesel</option>
+              <option value="electric">Electric</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="form-label">Price Range (per day)</label>
+            <input type="number" id="minPrice" class="form-input" placeholder="Min">
+            <input type="number" id="maxPrice" class="form-input mt-2" placeholder="Max">
+          </div>
+
+          <button class="btn btn-primary" style="width: 100%;" onclick="applyFilters()">Apply Filters</button>
+          <button class="btn btn-ghost" style="width: 100%; margin-top: 10px;" onclick="clearFilters()">Clear</button>
+        </aside>
+
+        <!-- Vehicle Grid -->
+        <main class="vehicles-grid">
+          <div id="vehiclesList">
+            <div class="loading-container" style="min-height: 400px; display: flex; align-items: center; justify-content: center;">
+              <div class="loading-spinner"></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2026 RentRide. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <style>
+    .vehicles-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: var(--spacing-lg);
+      margin-top: var(--spacing-xl);
+    }
+
+    .filters-sidebar {
+      height: fit-content;
+      position: sticky;
+      top: 100px;
+    }
+
+    .filter-group {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .vehicles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--spacing-lg);
+    }
+
+    @media (max-width: 968px) {
+      .vehicles-layout {
+        grid-template-columns: 1fr;
+      }
+      .filters-sidebar {
+        position: static;
+      }
+    }
+  </style>
+
+  <script src="js/utils.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    if (token) {
+      document.getElementById('authLink').innerHTML = '<a href="dashboard.html" class="btn btn-primary btn-sm">Dashboard</a>';
+    }
+
+    document.getElementById('navbarToggle')?.addEventListener('click', () => {
+      document.getElementById('navbarMenu')?.classList.toggle('active');
+    });
+
+    async function loadVehicles(filters = {}) {
+      try {
+        const params = { available: 'true', ...filters };
+        const data = await API.getVehicles(params);
+
+        const vehiclesList = document.getElementById('vehiclesList');
+        if (data.success && data.vehicles.length > 0) {
+          vehiclesList.innerHTML = data.vehicles.map(vehicle => `
+            <div class="vehicle-card" onclick="window.location.href='vehicle-details.html?id=${vehicle._id}'">
+              <img src="${vehicle.images[0] || 'https://via.placeholder.com/400x240'}" alt="${vehicle.name}" class="vehicle-card-image">
+              <div class="vehicle-card-content">
+                <div class="vehicle-card-header">
+                  <div>
+                    <div class="vehicle-card-name">${vehicle.name}</div>
+                    <div class="vehicle-card-type">${vehicle.type}</div>
+                  </div>
+                  <div class="vehicle-card-price">$${vehicle.pricePerDay}<span style="font-size: 0.875rem; font-weight: 500;">/day</span></div>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.875rem; margin: var(--spacing-sm) 0;">${vehicle.description.substring(0, 100)}...</p>
+                <div class="vehicle-card-info">
+                  <div class="vehicle-card-spec">👥 ${vehicle.specifications.seats}</div>
+                  <div class="vehicle-card-spec">⚙️ ${vehicle.specifications.transmission}</div>
+                  <div class="vehicle-card-spec">⛽ ${vehicle.specifications.fuelType}</div>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          vehiclesList.innerHTML = '<p class="text-center" style="grid-column: 1 / -1;">No vehicles found matching your criteria.</p>';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showToast('Failed to load vehicles', 'error');
+      }
+    }
+
+    function applyFilters() {
+      const filters = {};
+      const type = document.getElementById('filterType').value;
+      const transmission = document.getElementById('filterTransmission').value;
+      const fuel = document.getElementById('filterFuel').value;
+      const minPrice = document.getElementById('minPrice').value;
+      const maxPrice = document.getElementById('maxPrice').value;
+
+      if (type) filters.type = type;
+      if (transmission) filters.transmission = transmission;
+      if (fuel) filters.fuelType = fuel;
+      if (minPrice) filters.minPrice = minPrice;
+      if (maxPrice) filters.maxPrice = maxPrice;
+
+      loadVehicles(filters);
+    }
+
+    function clearFilters() {
+      document.getElementById('filterType').value = '';
+      document.getElementById('filterTransmission').value = '';
+      document.getElementById('filterFuel').value = '';
+      document.getElementById('minPrice').value = '';
+      document.getElementById('maxPrice').value = '';
+      loadVehicles();
+    }
+
+    // Load URL params
+    const urlParams = getUrlParams();
+    if (urlParams.type) {
+      document.getElementById('filterType').value = urlParams.type;
+      loadVehicles({ type: urlParams.type });
+    } else {
+      loadVehicles();
+    }
+  </script>
+</body>
+</html>

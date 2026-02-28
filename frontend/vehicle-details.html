@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vehicle Details - RentRide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+  
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">🚗 RentRide</a>
+      <ul class="navbar-menu">
+        <li><a href="index.html" class="navbar-link">Home</a></li>
+        <li><a href="vehicles.html" class="navbar-link">Browse Vehicles</a></li>
+        <li id="authLink"><a href="login.html" class="btn btn-primary btn-sm">Login</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div style="padding: 100px 0 40px;">
+    <div class="container">
+      <div id="vehicleDetails" class="loading-container" style="min-height: 400px;">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Modal -->
+  <div id="bookingModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Complete Your Booking</h3>
+        <button class="modal-close" onclick="closeModal('bookingModal')">×</button>
+      </div>
+      
+      <div id="bookingForm">
+        <div class="form-group">
+          <label class="form-label">Pick-up Date</label>
+          <input type="date" id="bookingStartDate" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Return Date</label>
+          <input type="date" id="bookingEndDate" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pickup Location (Optional)</label>
+          <input type="text" id="pickupLocation" class="form-input" placeholder="Enter location">
+        </div>
+        
+        <div class="booking-summary card-glass mb-3">
+          <div class="flex-between mb-2">
+            <span>Total Days:</span>
+            <strong id="totalDays">0</strong>
+          </div>
+          <div class="flex-between mb-2">
+            <span>Price per Day:</span>
+            <strong id="pricePerDay">$0</strong>
+          </div>
+          <div class="flex-between" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+            <span style="font-size: 1.25rem;">Total:</span>
+            <strong id="totalPrice" style="font-size: 1.5rem; color: var(--primary-light);">$0</strong>
+          </div>
+        </div>
+
+        <div id="paymentElement"></div>
+        
+        <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="processBooking()">
+          Complete Payment & Book
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    let currentVehicle = null;
+    let stripe = null;
+    let elements = null;
+    let paymentIntent = null;
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      document.getElementById('authLink').innerHTML = '<a href="dashboard.html" class="btn btn-primary btn-sm">Dashboard</a>';
+    }
+
+    const vehicleId = getUrlParams().id;
+    if (!vehicleId) {
+      window.location.href = 'vehicles.html';
+    }
+
+    async function loadVehicleDetails() {
+      try {
+        const data = await API.getVehicle(vehicleId);
+        if (data.success) {
+          currentVehicle = data.vehicle;
+          displayVehicle(data.vehicle);
+        }
+      } catch (error) {
+        showToast('Failed to load vehicle details', 'error');
+        setTimeout(() => window.location.href = 'vehicles.html', 2000);
+      }
+    }
+
+    function displayVehicle(vehicle) {
+      document.getElementById('vehicleDetails').innerHTML = `
+        <div class="vehicle-details-layout">
+          <div class="vehicle-images">
+            <img src="${vehicle.images[0] || 'https://via.placeholder.com/800x500'}" alt="${vehicle.name}" class="main-vehicle-image">
+          </div>
+          
+          <div class="vehicle-info card">
+            <h1>${vehicle.name}</h1>
+            <div class="vehicle-meta">
+              <span class="badge badge-primary">${vehicle.type}</span>
+              <span class="badge ${vehicle.availability ? 'badge-success' : 'badge-danger'}">${vehicle.availability ? 'Available' : 'Not Available'}</span>
+            </div>
+            
+            <div class="vehicle-price">
+              <span style="font-size: 3rem; font-weight: 800; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">$${vehicle.pricePerDay}</span>
+              <span style="font-size: 1.25rem; color: var(--text-muted);">/day</span>
+            </div>
+
+            <p style="color: var(--text-secondary); font-size: 1.125rem; margin: var(--spacing-lg) 0;">${vehicle.description}</p>
+
+            <div class="specs-grid">
+              <div class="spec-item">
+                <div class="spec-icon">👥</div>
+                <div>
+                  <div class="spec-label">Seats</div>
+                  <div class="spec-value">${vehicle.specifications.seats} People</div>
+                </div>
+              </div>
+              <div class="spec-item">
+                <div class="spec-icon">⚙️</div>
+                <div>
+                  <div class="spec-label">Transmission</div>
+                  <div class="spec-value">${vehicle.specifications.transmission}</div>
+                </div>
+              </div>
+              <div class="spec-item">
+                <div class="spec-icon">⛽</div>
+                <div>
+                  <div class="spec-label">Fuel</div>
+                  <div class="spec-value">${vehicle.specifications.fuelType}</div>
+                </div>
+              </div>
+              <div class="spec-item">
+                <div class="spec-icon">📍</div>
+                <div>
+                  <div class="spec-label">Location</div>
+                  <div class="spec-value">${vehicle.location.city}</div>
+                </div>
+              </div>
+            </div>
+
+            ${vehicle.features && vehicle.features.length > 0 ? `
+              <div style="margin-top: var(--spacing-lg);">
+                <h4>Features</h4>
+                <div class="features-list">
+                  ${vehicle.features.map(f => `<span class="feature-tag">✓ ${f}</span>`).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            <button class="btn btn-primary btn-lg" style="width: 100%; margin-top: var(--spacing-xl);" onclick="initiateBooking()" ${!vehicle.availability ? 'disabled' : ''}>
+              ${vehicle.availability ? 'Book Now' : 'Not Available'}
+            </button>
+          </div>
+        </div>
+      `;
+
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('bookingStartDate').setAttribute('min', today);
+      document.getElementById('bookingEndDate').setAttribute('min', today);
+    }
+
+    function initiateBooking() {
+      if (!token) {
+        showToast('Please login to book a vehicle', 'warning');
+        setTimeout(() => window.location.href = 'login.html', 1500);
+        return;
+      }
+      openModal('bookingModal');
+    }
+
+    document.getElementById('bookingStartDate')?.addEventListener('change', calculateTotal);
+    document.getElementById('bookingEndDate')?.addEventListener('change', calculateTotal);
+
+    function calculateTotal() {
+      const startDate = document.getElementById('bookingStartDate').value;
+      const endDate = document.getElementById('bookingEndDate').value;
+
+      if (startDate && endDate && currentVehicle) {
+        const days = calculateDays(startDate, endDate);
+        const total = days * currentVehicle.pricePerDay;
+
+        document.getElementById('totalDays').textContent = days;
+        document.getElementById('pricePerDay').textContent = `$${currentVehicle.pricePerDay}`;
+        document.getElementById('totalPrice').textContent = `$${total}`;
+      }
+    }
+
+    async function processBooking() {
+      const startDate = document.getElementById('bookingStartDate').value;
+      const endDate = document.getElementById('bookingEndDate').value;
+      const pickupLocation = document.getElementById('pickupLocation').value;
+
+      if (!startDate || !endDate) {
+        showToast('Please select booking dates', 'warning');
+        return;
+      }
+
+      try {
+        // Create booking
+        const bookingData = await API.createBooking({
+          vehicle: vehicleId,
+          startDate,
+          endDate,
+          pickupLocation: pickupLocation || currentVehicle.location.city,
+          dropoffLocation: currentVehicle.location.city
+        });
+
+        if (bookingData.success) {
+          showToast('Booking created! Processing payment...', 'success');
+          // Redirect to payment with booking ID
+          window.location.href = `payment.html?bookingId=${bookingData.booking._id}`;
+        }
+      } catch (error) {
+        showToast(error.message || 'Booking failed', 'error');
+      }
+    }
+
+    loadVehicleDetails();
+  </script>
+
+  <style>
+    .vehicle-details-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: var(--spacing-xl);
+      margin-top: var(--spacing-lg);
+    }
+
+    .main-vehicle-image {
+      width: 100%;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .vehicle-meta {
+      display: flex;
+      gap: var(--spacing-sm);
+      margin: var(--spacing-md) 0;
+    }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-md);
+      margin: var(--spacing-lg) 0;
+    }
+
+    .spec-item {
+      display: flex;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-md);
+      background: var(--bg-glass);
+      border-radius: var(--radius-md);
+    }
+
+    .spec-icon {
+      font-size: 2rem;
+    }
+
+    .spec-label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .spec-value {
+      font-weight: 600;
+      color: var(--text-primary);
+      text-transform: capitalize;
+    }
+
+    .features-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-sm);
+      margin-top: var(--spacing-sm);
+    }
+
+    .feature-tag {
+      padding: 0.5rem 1rem;
+      background: var(--bg-glass);
+      border-radius: var(--radius-full);
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    @media (max-width: 968px) {
+      .vehicle-details-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .specs-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</body>
+</html>

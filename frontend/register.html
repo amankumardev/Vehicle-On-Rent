@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - RentRide</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <a href="index.html" class="auth-brand">🚗 RentRide</a>
+        <h1>Create Account</h1>
+        <p>Join us and start renting your perfect vehicle</p>
+      </div>
+
+      <form id="registerForm" class="auth-form">
+        <div class="form-group">
+          <label class="form-label" for="name">Full Name</label>
+          <input 
+            type="text" 
+            id="name" 
+            class="form-input" 
+            placeholder="John Doe"
+            required
+          >
+          <span class="form-error" id="nameError"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input 
+            type="email" 
+            id="email" 
+            class="form-input" 
+            placeholder="your.email@example.com"
+            required
+          >
+          <span class="form-error" id="emailError"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone Number</label>
+          <input 
+            type="tel" 
+            id="phone" 
+            class="form-input" 
+            placeholder="+1 (555) 123-4567"
+            required
+          >
+          <span class="form-error" id="phoneError"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            class="form-input" 
+            placeholder="Min. 6 characters"
+            required
+          >
+          <span class="form-error" id="passwordError"></span>
+          <div class="password-strength" id="passwordStrength"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="confirmPassword">Confirm Password</label>
+          <input 
+            type="password" 
+            id="confirmPassword" 
+            class="form-input" 
+            placeholder="Re-enter password"
+            required
+          >
+          <span class="form-error" id="confirmPasswordError"></span>
+        </div>
+
+        <div class="form-checkbox mb-3">
+          <input type="checkbox" id="terms" required>
+          <label for="terms">I agree to the Terms & Conditions</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          Create Account
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Already have an account? <a href="login.html">Login</a></p>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: var(--spacing-md);
+      background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 50%),
+                  radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.15), transparent 50%),
+                  var(--gradient-dark);
+    }
+
+    .auth-container {
+      width: 100%;
+      max-width: 450px;
+      animation: fadeIn 0.6s ease-out;
+      margin: var(--spacing-lg) 0;
+    }
+
+    .auth-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border-radius: var(--radius-xl);
+      padding: var(--spacing-2xl);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .auth-brand {
+      display: inline-block;
+      font-size: 2rem;
+      margin-bottom: var(--spacing-md);
+      text-decoration: none;
+    }
+
+    .auth-header h1 {
+      font-size: 2rem;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .auth-header p {
+      color: var(--text-muted);
+      margin-bottom: 0;
+    }
+
+    .auth-form {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .auth-footer {
+      text-align: center;
+      padding-top: var(--spacing-lg);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .auth-footer p {
+      margin: 0;
+      color: var(--text-secondary);
+    }
+
+    .auth-footer a {
+      color: var(--primary-light);
+      font-weight: 600;
+    }
+
+    .auth-footer a:hover {
+      color: var(--primary);
+    }
+
+    .password-strength {
+      margin-top: 0.5rem;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--bg-tertiary);
+      overflow: hidden;
+    }
+
+    .password-strength::after {
+      content: '';
+      display: block;
+      height: 100%;
+      transition: all 0.3s;
+    }
+
+    .password-strength.weak::after {
+      width: 33%;
+      background: var(--danger);
+    }
+
+    .password-strength.medium::after {
+      width: 66%;
+      background: var(--warning);
+    }
+
+    .password-strength.strong::after {
+      width: 100%;
+      background: var(--success);
+    }
+  </style>
+
+  <script src="js/utils.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    // Check if already logged in
+    if (getToken()) {
+      window.location.href = 'dashboard.html';
+    }
+
+    // Password strength indicator
+    document.getElementById('password').addEventListener('input', (e) => {
+      const password = e.target.value;
+      const strengthBar = document.getElementById('passwordStrength');
+
+      if (password.length === 0) {
+        strengthBar.className = 'password-strength';
+      } else if (password.length < 6) {
+        strengthBar.className = 'password-strength weak';
+      } else if (password.length < 10) {
+        strengthBar.className = 'password-strength medium';
+      } else {
+        strengthBar.className = 'password-strength strong';
+      }
+    });
+
+    // Handle registration form submission
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Clear previous errors
+      ['nameError', 'emailError', 'phoneError', 'passwordError', 'confirmPasswordError'].forEach(id => {
+        document.getElementById(id).textContent = '';
+      });
+
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      // Validation
+      let hasError = false;
+
+      if (name.length < 2) {
+        document.getElementById('nameError').textContent = 'Name must be at least 2 characters';
+        hasError = true;
+      }
+
+      if (!validateEmail(email)) {
+        document.getElementById('emailError').textContent = 'Please enter a valid email address';
+        hasError = true;
+      }
+
+      if (!validatePhone(phone)) {
+        document.getElementById('phoneError').textContent = 'Please enter a valid phone number';
+        hasError = true;
+      }
+
+      if (!validatePassword(password)) {
+        document.getElementById('passwordError').textContent = 'Password must be at least 6 characters';
+        hasError = true;
+      }
+
+      if (password !== confirmPassword) {
+        document.getElementById('confirmPasswordError').textContent = 'Passwords do not match';
+        hasError = true;
+      }
+
+      if (hasError) return;
+
+      // Submit registration
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      setLoading(submitBtn, true);
+
+      try {
+        const data = await API.register({ name, email, phone, password });
+
+        // Store token and user data
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        showToast('Account created successfully! Redirecting...', 'success');
+
+        // Redirect to dashboard
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1000);
+
+      } catch (error) {
+        showToast(error.message || 'Registration failed. Please try again.', 'error');
+        setLoading(submitBtn, false);
+      }
+    });
+  </script>
+</body>
+</html>

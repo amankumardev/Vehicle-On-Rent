@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment - RentRide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+  
+  <div class="payment-container">
+    <div class="payment-card card">
+      <div class="payment-header">
+        <a href="index.html" class="auth-brand">🚗 RentRide</a>
+        <h1>Complete Payment</h1>
+        <p>Securely pay for your booking</p>
+      </div>
+
+      <div id="paymentContent">
+        <div class="loading-container" style="min-height: 300px;">
+          <div class="loading-spinner"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    if (!requireAuth()) {
+      // Will redirect if not authenticated
+    }
+
+    const bookingId = getUrlParams().bookingId;
+    if (!bookingId) {
+      showToast('No booking found', 'error');
+      setTimeout(() => window.location.href = 'dashboard.html', 1500);
+    }
+
+    let stripe = null;
+    let elements = null;
+    let currentBooking = null;
+
+    async function initializePayment() {
+      try {
+        // Get booking details
+        const bookingData = await API.getBooking(bookingId);
+        if (!bookingData.success) {
+          throw new Error('Booking not found');
+        }
+
+        currentBooking = bookingData.booking;
+
+        // Check if already paid
+        if (currentBooking.paymentStatus === 'paid') {
+          showToast('This booking has already been paid', 'success');
+          setTimeout(() => window.location.href = 'dashboard.html', 2000);
+          return;
+        }
+
+        // Create payment intent
+        const paymentData = await API.createPaymentIntent(bookingId);
+        
+        // Initialize Stripe (use test key)
+        stripe = Stripe('pk_test_51QcGEJDMy9n8fDjFZpzxYvhWJxztkUNZF3KqfAKvJtRdXe0oLpUF4B2vNv2xBJvx3VFOKJZNsU1HJWvY5Q0wOZRP00uPb8YQlW');
+        
+        elements = stripe.elements({ clientSecret: paymentData.clientSecret });
+        const paymentElement = elements.create('payment');
+        
+        // Display payment UI
+        displayPaymentForm(paymentElement, paymentData.paymentIntentId);
+        
+        paymentElement.mount('#payment-element');
+      } catch (error) {
+        console.error('Error:', error);
+        showToast(error.message || 'Failed to initialize payment', 'error');
+        setTimeout(() => window.location.href = 'dashboard.html', 2000);
+      }
+    }
+
+    function displayPaymentForm(paymentElement, paymentIntentId) {
+      document.getElementById('paymentContent').innerHTML = `
+        <div class="booking-summary card-glass mb-4">
+          <h3>Booking Summary</h3>
+          <div class="summary-row">
+            <span>Vehicle:</span>
+            <strong>${currentBooking.vehicle.name}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Dates:</span>
+            <strong>${formatDate(currentBooking.startDate)} - ${formatDate(currentBooking.endDate)}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Total Days:</span>
+            <strong>${currentBooking.totalDays}</strong>
+          </div>
+          <div class="summary-row total-row">
+            <span>Total Amount:</span>
+            <strong>${formatPrice(currentBooking.totalPrice)}</strong>
+          </div>
+        </div>
+
+        <h3 class="mb-3">Payment Details</h3>
+        <form id="payment-form">
+          <div id="payment-element" class="mb-3"></div>
+          <div id="payment-message" class="form-error hidden"></div>
+          <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+            Pay ${formatPrice(currentBooking.totalPrice)}
+          </button>
+        </form>
+
+        <p class="text-center mt-3" style="color: var(--text-muted); font-size: 0.875rem;">
+          🔒 Secured by Stripe • Your payment information is encrypted and secure
+        </p>
+      `;
+
+      // Handle payment form submission
+      document.getElementById('payment-form').addEventListener('submit', handlePaymentSubmit);
+    }
+
+    async function handlePaymentSubmit(e) {
+      e.preventDefault();
+      
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      setLoading(submitBtn, true);
+
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: window.location.origin + '/payment-success.html?bookingId=' + bookingId
+        }
+      });
+
+      if (error) {
+        // Show error
+        const messageContainer = document.getElementById('payment-message');
+        messageContainer.textContent = error.message;
+        messageContainer.classList.remove('hidden');
+        setLoading(submitBtn, false);
+        showToast(error.message, 'error');
+      } else {
+        // Payment will be handled by return_url
+        showToast('Processing payment...', 'success');
+      }
+    }
+
+    // Initialize on page load
+    initializePayment();
+  </script>
+
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: var(--spacing-md);
+      background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 50%),
+                  radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.15), transparent 50%),
+                  var(--gradient-dark);
+    }
+
+    .payment-container {
+      width: 100%;
+      max-width: 600px;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .payment-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border-radius: var(--radius-xl);
+      padding: var(--spacing-2xl);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .payment-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .auth-brand {
+      display: inline-block;
+      font-size: 2rem;
+      margin-bottom: var(--spacing-md);
+      text-decoration: none;
+    }
+
+    .payment-header h1 {
+      font-size: 2rem;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .payment-header p {
+      color: var(--text-muted);
+      margin-bottom: 0;
+    }
+
+    .booking-summary h3 {
+      margin-bottom: var(--spacing-md);
+      font-size: 1.25rem;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .summary-row span {
+      color: var(--text-secondary);
+    }
+
+    .total-row {
+      font-size: 1.25rem;
+      margin-top: var(--spacing-sm);
+      padding-top: var(--spacing-md);
+      border-top: 2px solid rgba(255, 255, 255, 0.2);
+      border-bottom: none;
+    }
+
+    .total-row strong {
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    #payment-element {
+      padding: var(--spacing-md);
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</body>
+</html>
