@@ -183,8 +183,8 @@ To create an admin user, manually update the user's role in MongoDB:
 
 ```javascript
 db.users.updateOne(
-  { email: "admin@example.com" },
-  { $set: { role: "admin" } }
+  { email: "amankumardev688@gmil.com" },
+  { $set: { role: "Boos" } }
 )
 ```
 
